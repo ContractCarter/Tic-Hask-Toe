@@ -90,17 +90,13 @@ replaceSquareInRow row col player =
     in before ++ (player:after)
 -- Q#08
 
-type RowStrings = [String]
-
-prependRowIndices :: RowStrings -> RowStrings
-prependRowIndices rowStrings = worker (indexRowStrings rowStrings)
-  where
-    worker :: [(Char, String)] -> RowStrings
-    worker [] = []
-    worker ((index, row):rest) = (index : row) : worker rest
-
-indexRowStrings :: RowStrings -> [(Char, String)]
-indexRowStrings rowStrings = zip ['A'..] rowStrings
+prependRowIndices :: [String] -> [String]
+prependRowIndices [] =[]
+prependRowIndices x = go (zip ['A'..] x )
+    where 
+        go :: [(Char,String)] ->[String]
+        go []           = []
+        go ((a1,b1):ax) = ([a1] ++ b1) : go ax
 
 -- Q#09
 
@@ -117,19 +113,10 @@ isWinningLine player line = worker False line
 -- Q#10
 
 isValidMove :: Board -> Move -> Bool
-isValidMove board move
-  | not (isMoveInBounds board move) = False
-  | otherwise = worker board move
-  where
-    worker :: Board -> Move -> Bool
-    worker [] _ = False
-    worker (row:rows) (moveRow, col)
-      | moveRow == 0 = isColEmpty row col
-      | otherwise = worker rows (moveRow - 1, col)
-
-isMoveInBounds :: Board -> Move -> Bool
-isMoveInBounds board (row, col) =
-  row >= 0 && row < length board && col >= 0 && col < length (head board)
-
-isColEmpty :: [Char] -> Int -> Bool
-isColEmpty row col = row !! col == '-'
+isValidMove [] _ = False
+isValidMove x (i,j)  = isMoveInBounds (i,j) && go True x i
+        where 
+            go :: Bool -> Board -> Int -> Bool
+            go _ [] _            = False 
+            go acc (x:_) 0       = isColEmpty x j && acc
+            go acc (_x:xs) y     =   go acc xs (y-1)
